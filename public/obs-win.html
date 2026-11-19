@@ -18,7 +18,7 @@ svg text{font-family:"Noto Sans CJK TC","Noto Sans TC","Noto Sans JP","Noto Sans
 <link rel="stylesheet" href="css/live-flags.css?v=53.16s11b">
 </head><body>
 <svg id="stage" viewBox="0 0 3840 2160" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
-<script src="js/obs-layout.js?v=53.16s11b"></script>
+<script src="js/obs-layout.js?v=53.16s11b-type1"></script>
 <script src="js/obs-duo.js?v=53.16s11b"></script>
 <script src="mimi-cameo/mimi-cameo.bundle.js?v=53.16s11b"></script>
 <script src="pengpeng/pengpeng.bundle.js?v=53.16s11b"></script>
@@ -443,7 +443,9 @@ function bindWinData(D){
     if(L.setCardName) L.setCardName(o.nameT,c.name||'');
     else { o.nameT.textContent=c.name||''; o.nameT.setAttribute('font-size', (c.name&&c.name.length>3)?TYPE.nameLong:TYPE.name); }
     paintScore(o.score,c.score);
-    o.statsT.textContent=`摸 ${c.stats[0]}　胡 ${c.stats[1]}　槍 ${c.stats[2]}`;
+    const statsText=`摸 ${c.stats[0]}　胡 ${c.stats[1]}　槍 ${c.stats[2]}`;
+    if(L.setCardStats) L.setCardStats(o.statsT,statsText);
+    else o.statsT.textContent=statsText;
     applyWinStroke(o.nameT,win); applyWinStroke(o.score,win); applyWinStroke(o.statsT,win);
     o.dealerG.setAttribute('opacity',c.dealer?1:0);
     o.glow.setAttribute('opacity','0'); o.liq.setAttribute('opacity','0');

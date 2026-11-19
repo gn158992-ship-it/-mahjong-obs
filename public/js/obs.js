@@ -1125,7 +1125,9 @@
         card.name.setAttribute('font-size', String(nm.length > 3 ? TYPE.nameLong : TYPE.name));
       }
       if (card.wind) card.wind.textContent = wind ? (wind + '家') : '';
-      card.stats.textContent = '摸 ' + (p.mo || 0) + '　胡 ' + (p.hu || 0) + '　槍 ' + (p.qiang || 0);
+      const statsText = '摸 ' + (p.mo || 0) + '　胡 ' + (p.hu || 0) + '　槍 ' + (p.qiang || 0);
+      if (L.setCardStats) L.setCardStats(card.stats, statsText);
+      else card.stats.textContent = statsText;
       if (p.dealer) {
         setCardDealer(card, true);
         const streak = Number(p.streak) || 0;

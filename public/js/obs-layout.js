@@ -1,7 +1,7 @@
 /* OBS corner-card layout v2（繪珊・清楚好讀版）— authored in 3840×2160 design px at FINAL size.
    - CARD_W / CARD_H 是唯一共用尺寸：live overlay、胡牌動畫卡、星星終點都讀這裡。
      所有卡內文字位置都由 CARD_W / CARD_H 推出來，改這兩個數字就整組跟著變。
-   - 白底、深色粗字；分數 正＝亮綠、負＝紅、0＝深灰（白底對比 ≥4.5:1，大字 AAA）。
+   - 白底、深色粗字；分數 正＝深綠、負＝深紅、0＝深灰。
    - 每張卡的「底圖」可以單獨換：CARD_BG[tl|tr|bl|br] + setCardBg()（純向量，無點陣、無 filter）。
    - 不畫 780×560 再縮放；不用 CSS scale / zoom。 */
 (function (root) {
@@ -21,14 +21,13 @@
   const TEXT_MAX_W = CARD_W - CARD_INSET * 2;
 
   /* 顏色：白底對比（WCAG 相對亮度）
-     INK #141414 18.4:1、STATS #2E2E2E 13.6:1、POS #00873A 4.6:1、NEG #D60000 5.4:1、ZERO #4D4D4D 8.5:1
-     分數 ≥176px 粗體＝WCAG「大字」，4.5:1 即達 AAA。 */
+     姓名 18.4:1；摸胡槍 15.5:1；正分 7.0:1 以上、負分 8.0:1 以上、零分 13.0:1 以上。 */
   const COLORS = {
     ink: '#141414',
-    stats: '#2E2E2E',
-    pos: '#00873A',
-    neg: '#D60000',
-    zero: '#4D4D4D',
+    stats: '#242424',
+    pos: '#00632F',
+    neg: '#A10016',
+    zero: '#303030',
     dealer: '#D60000',
     dealerText: '#FFFFFF',
     lianBg: '#FFFFFF',
@@ -42,21 +41,22 @@
     return (n > 0 ? '+' : n < 0 ? '\u2212' : '') + Math.abs(n);
   }
 
-  /* 字級：v2 設計值 × (CARD_H/384)。分數略縮，好讓名字／分數／統計墨水間距 ≥24px。
-     4K → 1080p 約為一半。長名字／五位數再由 fitText 縮到 nameMin／scoreMin，縮了只會更疏、不會撞字。 */
+  /* 字級以 4K 向量座標計；長名字、大分數與多位數統計仍在原有安全寬度內縮放。 */
   const TYPE_SCALE = CARD_H / 384;
   const TYPE = {
     font: '"Noto Sans TC", "Noto Sans CJK TC", sans-serif',
     seat: 42,
     seatWeight: 800,
-    name: Math.round(100 * TYPE_SCALE),
-    nameLong: Math.round(100 * TYPE_SCALE), // v2 不再用固定長名字級，改用 fitText
+    wind: Math.round(54 * TYPE_SCALE),
+    name: 94,
+    nameLong: 94, // v2 不再用固定長名字級，改用 fitText
     nameMin: Math.round(64 * TYPE_SCALE),
     nameWeight: 900,
-    score: 140,
+    score: 150,
     scoreMin: Math.round(120 * TYPE_SCALE),
     scoreWeight: 900,
-    stats: Math.round(54 * TYPE_SCALE),
+    stats: 50,
+    statsMin: 40,
     statsWeight: 800,
     statsFill: COLORS.stats,
     lian: Math.round(52 * TYPE_SCALE),
@@ -72,7 +72,7 @@
 
   /* 垂直排版（由 CARD_H 推）：色帶 → 名字 → 分數 → 統計。
      Noto Sans TC Black：CJK 墨水約在 baseline 上 0.88em、下 0.08em；數字墨水 0.73em、下 0。
-     把分數放在名字底部與統計頂部的正中，兩邊墨水間距對齊且 ≥24px。 */
+     把分數放在名字底部與統計頂部的正中，使上下墨水留白均衡。 */
   const SCORE_INK_DESCENT = 0;
   const STATS_INK_ASCENT = Math.round(TYPE.stats * 0.84);
   const NAME_SCORE_GAP_MIN = 24;
@@ -149,14 +149,15 @@
   }
 
   /* ---------- 文字自動縮放（不量 DOM：字型還沒載完也穩定） ----------
-     Noto Sans TC Black 字寬（em）：CJK/全形 1.0、數字 0.58、+−＝ 0.60、拉丁大寫 0.68、小寫 0.56、空白 0.25。 */
+     Noto Sans TC Black 字寬（em）：CJK/全形 1.0、數字 0.60、+− 0.62、拉丁大寫 0.68、小寫 0.56、空白 0.25。 */
   function estWidthEm(s) {
     s = String(s == null ? '' : s);
     let w = 0;
     for (const ch of s) {
       const c = ch.codePointAt(0);
-      if (c >= 0x30 && c <= 0x39) w += 0.58;
-      else if (ch === '+' || ch === '\u2212' || ch === '-') w += 0.60;
+      if (c >= 0x30 && c <= 0x39) w += 0.60;
+      else if (ch === '×') w += 1.0;
+      else if (ch === '+' || ch === '\u2212' || ch === '-') w += 0.62;
       else if (c >= 0x41 && c <= 0x5A) w += 0.68;
       else if (c >= 0x61 && c <= 0x7A) w += 0.56;
       else if (c === 0x20) w += 0.25;
@@ -186,6 +187,11 @@
     const nm = String(name == null || name === '' ? '—' : name);
     if (node.textContent !== nm) node.textContent = nm;
     fitText(node, nm, TYPE.name, TYPE.nameMin, TEXT_MAX_W);
+  }
+  function setCardStats(node, text) {
+    if (!node || node.textContent === text) return;
+    node.textContent = text;
+    fitText(node, text, TYPE.stats, TYPE.statsMin, TEXT_MAX_W);
   }
   /* 分數：每格都可呼叫（只在字串長度改變時重算字級）。 */
   function setCardScore(node, v) {
@@ -461,6 +467,7 @@
     fitText: fitText,
     setCardName: setCardName,
     setCardScore: setCardScore,
+    setCardStats: setCardStats,
     paintShell: paintShell,
     buildCard: buildCard,
     setCardBg: setCardBg,
