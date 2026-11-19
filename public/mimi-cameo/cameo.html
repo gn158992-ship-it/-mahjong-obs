@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<title>咪姬亮相 cameo 測試頁（4K 向量）</title>
+<style>
+html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:transparent}
+#bg{position:fixed;inset:0;background:url(../live.jpg) center/cover no-repeat;display:none}
+#stage{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+svg text{font-family:"Noto Sans CJK TC","Noto Sans TC","Noto Serif CJK TC",sans-serif}
+</style></head><body>
+<div id="bg"></div>
+<!-- native 3840×2160 design space; OBS Browser Source should be 3840×2160 so 1 unit = 1 px -->
+<svg id="stage" viewBox="0 0 3840 2160" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <g id="ghost" style="display:none">
+    <!-- preview-only stand-in for the win plaque (bg=1), so placement can be judged -->
+    <rect x="1170" y="711" width="1500" height="878" rx="120" fill="#FFFDF7" stroke="#FFB7C5" stroke-width="18" opacity=".9"/>
+  </g>
+  <g id="layer"></g>
+</svg>
+<script src="mimi-cameo.bundle.js"></script>
+<script>
+/* URL params: ?bg=1 preview background  ?t=1.2 freeze at cameo-local second  ?line=0-9  ?d=1.9 length
+               ?x=2700&y=1630 feet position  ?autoplay=1 loop */
+const Q=new URLSearchParams(location.search);
+if(Q.get('bg')==='1'){document.getElementById('bg').style.display='block';document.getElementById('ghost').style.display='';}
+const layer=document.getElementById('layer');
+let cur=null, raf=0;
+function make(o){ if(cur) cur.remove(); cur=MIMI_CAMEO.mount(layer,{line:o.line,side:o.side}); cur.place(o.x??+(Q.get('x')||2700), o.y??+(Q.get('y')||1630)); cur.D=o.duration||+(Q.get('d')||1.9); return cur; }
+/* window.playMimiCameo({line, duration, x, y, side}) → Promise resolved when the cameo has fully exited */
+window.playMimiCameo=function(o={}){ return new Promise(res=>{ const c=make(o); cancelAnimationFrame(raf); const t0=performance.now();
+  const loop=now=>{const u=(now-t0)/1000; c.render(Math.min(u,c.D+0.001)); if(u<=c.D) raf=requestAnimationFrame(loop); else {c.render(-1); res(c.lines);} };
+  raf=requestAnimationFrame(loop); }); };
+window.renderAt=function(u){ cur.render(+u); };
+document.fonts.ready.then(()=>{
+  const line=Q.has('line')?+Q.get('line'):(Q.has('t')?0:undefined);
+  make({line});
+  if(Q.has('t')) cur.render(parseFloat(Q.get('t')));
+  else if(Q.get('autoplay')==='1'){ const go=()=>playMimiCameo({line:Q.has('line')?+Q.get('line'):undefined}).then(()=>setTimeout(go,1200)); go(); }
+  window.__ready=true;
+});
+</script></body></html>

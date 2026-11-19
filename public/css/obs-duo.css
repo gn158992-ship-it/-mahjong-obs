@@ -1,0 +1,59 @@
+/* v53.16：資訊列右側「老爺 × 咪姬」名稱槽（循環短片 + 文字後備）
+   座標在 3840×2160 設計像素，由 #duo-space 對齊 SVG meet 框。
+   圖層低於 #win-layer（40），胡牌動畫的星星／飄字不會被名稱槽蓋住。 */
+#duo-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 35; /* 高於 #draw-layer（30），低於 #win-layer（40）與 #obs-size-hint（80） */
+  pointer-events: none;
+  overflow: hidden;
+}
+#duo-layer:empty { display: none; } /* v53.16 s5：未掛名稱槽時不要佔滿畫面 */
+#duo-space {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3840px;
+  height: 2160px;
+  margin-left: -1920px;
+  margin-top: -1080px;
+  transform-origin: center center;
+}
+.duo-divider {
+  position: absolute;
+  width: 1px;
+  background: rgba(200, 149, 90, 0.4); /* #C8955A 40% */
+  pointer-events: none;
+}
+.duo-slot {
+  position: absolute;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Noto Sans TC", "Noto Sans CJK TC", sans-serif;
+  font-size: 96px;
+  font-weight: 900;
+  color: #4A3B33;
+  line-height: 1;
+  pointer-events: none;
+}
+.duo-slot .duo-clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  display: none;
+}
+.duo-slot.has-clip .duo-clip { display: block; }
+.duo-slot.has-clip .duo { display: none; }
+
+/* 繪珊：後備文字（檔案不在或載入失敗時）。規則保持原樣。 */
+.duo{position:relative;display:inline-flex;align-items:center;gap:.35em;overflow:hidden;font:inherit;color:inherit;animation:duoIn .8s ease-out both}
+.duo .x{display:inline-block;color:#C8955A;animation:duoBreathe 4s ease-in-out infinite;will-change:transform,opacity}
+.duo::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(255,240,210,.45) 50%,transparent 65%);transform:translateX(-120%);animation:duoSheen 9s ease-in-out infinite;will-change:transform}
+@keyframes duoIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes duoBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
+@keyframes duoSheen{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}

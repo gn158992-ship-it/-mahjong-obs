@@ -1,0 +1,122 @@
+/* s10c 直播保險：房主緊急開關、觀戰「準備中」、OBS 全透明。 */
+/* --s9-font-scale 從頁面繼承（預設 1），本頁不重設，系統／測試 130% 才會生效。 */
+.live-flags-sheet h2 {
+  font-size: calc(1.18rem * var(--s9-font-scale, 1));
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.live-flags-hint {
+  margin: 0 0 1rem;
+  text-align: center;
+  color: var(--ink-soft, #5C4C3C);
+  font-size: calc(13px * var(--s9-font-scale, 1));
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+  text-wrap: balance;
+}
+.live-flags-hint-glue { white-space: nowrap; }
+.live-flags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.live-flag-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem 0.9rem;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 60px;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  text-align: left;
+  letter-spacing: 0.06em;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+}
+.live-flag-toggle:active { transform: scale(0.99); }
+.live-flag-toggle[aria-pressed="true"] {
+  color: #FFF8F0;
+  background: linear-gradient(180deg, #557560 0%, #46654F 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 2px 4px rgba(70, 100, 79, .16);
+}
+.live-flag-toggle[aria-pressed="false"] {
+  color: #5C3A22;
+  background: #E6E1DA;
+  box-shadow: var(--shadow-sm), inset 0 0 0 1.5px #D4CEC4;
+}
+.live-flag-name {
+  flex: 1 1 8rem;
+  min-width: 0;
+  font-weight: 800;
+  font-size: calc(17px * var(--s9-font-scale, 1));
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.live-flag-state {
+  flex: 0 1 auto;
+  font-weight: 700;
+  font-size: calc(15px * var(--s9-font-scale, 1));
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.live-flag-toggle[aria-pressed="true"] .live-flag-state { color: #FFF8F0; }
+.live-flag-toggle[aria-pressed="false"] .live-flag-name,
+.live-flag-toggle[aria-pressed="false"] .live-flag-state { color: #5C3A22; }
+.live-flag-toggle.is-busy { opacity: 0.7; pointer-events: none; }
+
+/* 觀戰關閉：只顯示品牌底色與「準備中」，不含房號或網址。 */
+.live-spec-standby {
+  min-height: 100dvh;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.2rem;
+  box-sizing: border-box;
+  background: var(--paper, #F7F1E6);
+  color: var(--walnut, #5E3F27);
+}
+.live-spec-standby-msg {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: 0.28em;
+  text-align: center;
+}
+
+/* OBS：obsOverlay 關閉時整層隱藏，背景全透明。 */
+html.live-obs-off,
+body.live-obs-off {
+  background: transparent !important;
+}
+html.live-obs-off #frame,
+body.live-obs-off #frame,
+html.live-obs-off #obs-root,
+body.live-obs-off #obs-root {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html.live-win-off #stage,
+body.live-win-off #stage {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 第一次讀到 flags 前先藏 overlay，避免已關閉時重整閃出牌桌（1.5 秒後仍顯示）。 */
+html.live-obs-pending #frame,
+body.live-obs-pending #frame,
+html.live-obs-pending #obs-root,
+body.live-obs-pending #obs-root {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
